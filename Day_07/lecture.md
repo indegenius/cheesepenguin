@@ -317,7 +317,7 @@ app.post("/people", async (req, res) => {
   }
 });
 
-// PEOPLE CREATE ROUTE
+// PEOPLE Update Route
 app.put("/people/:id", async (req, res) => {
   try {
     // send all people
@@ -330,7 +330,7 @@ app.put("/people/:id", async (req, res) => {
   }
 });
 
-// PEOPLE CREATE ROUTE
+// PEOPLE Delete Route
 app.delete("/people/:id", async (req, res) => {
   try {
     // send all people

@@ -1,431 +1,1203 @@
-# Group Git
+## Express React Build
 
-### Objectives
-*After this lesson students will be able to*
-- Describe the different steps of the git workflow process
-- Explain basic git commands in terms of this model, e.g., commit, add, log
-- Safely work on a feature branch and merge it back to the master branch
-- Be aware of 2 pitfalls when working with git in a Group and how to resolve/avoid them.
+In this build we will
 
+- Build an Express API
+- Use Mongo/Mongoose with 1 model
+- Deploy the Api with Heroku
+- Build a Full Crud Frontend with React
+- Deploy with Netlify
 
-### The Git Workflow
+## Setup for Express Build
 
-![Basic Commands](https://i.imgur.com/blN6xuD.png)
+- Create a folder called express-react
+- Inside this folder create another folder called backend
+- Generate a React app called frontend `npx create-react-app frontend`
 
-Layer| Description
----- | ----
-Working Directory | Local file system (your computer's files like normal)
-Staging Area | Changes that have been `add`ed and are ready to commit
-History | Changes that have been committed in a series of commits uniquely identified by a `SHA1` hash
-Remote | An associated version of the repository on a remote host accessible via networking
+Your folder structure should look like this...
 
-
-The first three layers are ones we've seen before.  The working directory is the normal files on your machine; the staging area are files that will be included in the next commit; history denotes all committed changes.
-
-We've also been working with `remote`s when cloning/pushing from github.
-
-
-### Git Command Review
-
-Now let's go over some `git` commands used in the workflow.  Each command will typically either be used to inspect the changes at a particular layer(s) or it will transition a set of changes from one layer to another.
-
-Command | Function | Data Layer(s)
------ | ----- | -----
-add | move changes | WD -> Staging
-commit | move changes | Staging -> History
-status | inspect changes | WD/Staging/History (via what commit is the last one)
-branch | inspect | WD/History (via what branch is current)
-log | inspect | History
-push | move changes/sync | Local History -> Remote History
-pull | move changes/sync | Remote History -> Local History/WD/Current Branch
-checkout | move index | WD (moves WD reference to a different HEAD of History)
-merge | move changes | applies new changes from one branch to the HEAD of the current branch
-
-
-
-
-Let's look at an example and outline the steps up to committing and pushing to origin:
-
-### Feature Branching + Merging
-
-Conceptually what branching looks like:
-![Git Branch
-Diagram](https://wac-cdn.atlassian.com/dam/jcr:389059a7-214c-46a3-bc52-7781b4730301/hero.svg)
-
-
-This is what is happening under the hood:
-![Detailed Branch Diagram](https://i.imgur.com/gpqWlIs.png)
-
-### Main branch - Code Along
-
-Create a new folder called `git-demo` that will not be nested inside an existing git repo
-
-```sh
-mkdir git-demo
+```
+/express-react
+ -> /backend
+ -> /frontend
 ```
 
- Initialize this as a new git repo
+- cd into `backend` folder
 
-```sh
-git init
+## Setting up the Express app
 
-Initialized empty Git repository in /Users/username/Desktop/seir-526/unit3/lectures-dev/git-lecture-test2/.git/
+- create a new node project `npm init -y`
+- install dependencies `npm install dotenv mongoose express cors morgan`
+- install dev dependencies `npm install --save-dev nodemon`
+- setup npm scripts
+
+```json
+"scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+}
 ```
 
+- make files `touch .env .gitignore server.js`
 
-Create a new file called `hello.js`
+- put the following .gitignore
 
-```sh
-touch feature-hello.js
 ```
-Add a function called: `hello`
+/node_modules
+.env
+```
+
+- put the following in .env (make sure to use YOUR mongodb.com uri)
+
+```
+MONGODB_URL=mongodb+src://...
+PORT=4000
+```
+
+## Starting Server.js
+
+Let's build out the minimum to get server.js up and running
 
 ```js
-function hello() { }
+///////////////////////////////
+// DEPENDENCIES
+////////////////////////////////
+// get .env variables
+require("dotenv").config();
+// pull PORT from .env, give default value of 3000
+const { PORT = 3000 } = process.env;
+// import express
+const express = require("express");
+// create application object
+const app = express();
+
+///////////////////////////////
+// ROUTES
+////////////////////////////////
+// create a test route
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
+
+///////////////////////////////
+// LISTENER
+////////////////////////////////
+app.listen(PORT, () => console.log(`listening on PORT ${PORT}`));
 ```
 
-Git `add and commit` changes.  
+- run the server `npm run dev` and make sure you see "Hello World" when you go to `localhost:4000`
 
-```sh
-git add .
-git commit -m 'feature-hello - added hello function'
-```
+## Adding a Database Connection
 
-Look at the log files: 
-```sh
-git log
-
-commit 6f25491daadbd6ecabe0bd9499016be4133abd3b (HEAD -> master)
-Author: Joe Keohan <jkeohan@gmail.com>
-Date:   Wed Jul 15 08:10:31 2020 -0400
-
-  feature-hello - added hello function
-```
-
-Try using the `git log --oneline` flag
-
-```sh
-git log --oneline
-
-6f25491 (HEAD -> master) added hello function
-```
-
-
-Create a new online git repo called `git-demo`
-Add a new remote called `origin` to your local repo and use the url from the git repo 
-
-```sh
-git remote add origin git/github remote repo url
-```
-
-Push to the origin branch to the remote repo
-
-```sh
-git push origin master
-```
-
-### Feature Branch - Code Along
-
-As a project grows, it can help substantially to break out sets of changes into their own branches which are subsequently merged back into the `master` branch.  As you know, these branches can also be pushed to github.  
-
-![](https://i.imgur.com/o002Fk0.png)
-
-Let's check out a new feature branch 
-
-```sh
- git checkout -b feature-bye
-
- Switched to a new branch 'feature-bye'
- ```
-
-Confirm the branch exists and is the active branch: git branch
-
-```sh
-* feature-bye
-  master
-```
-
-Create a new file called: `bye.js`
-
-```sh
-touch bye.js
-```
-
-Add a function called: `bye`
+Let's update our server.js to include a database connection
 
 ```js
-function bye() { }
+///////////////////////////////
+// DEPENDENCIES
+////////////////////////////////
+// get .env variables
+require("dotenv").config();
+// pull PORT from .env, give default value of 3000
+// pull MONGODB_URL from .env
+const { PORT = 3000, MONGODB_URL } = process.env;
+// import express
+const express = require("express");
+// create application object
+const app = express();
+// import mongoose
+const mongoose = require("mongoose");
+
+///////////////////////////////
+// DATABASE CONNECTION
+////////////////////////////////
+// Establish Connection
+mongoose.connect(MONGODB_URL, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+});
+// Connection Events
+mongoose.connection
+  .on("open", () => console.log("Your are connected to mongoose"))
+  .on("close", () => console.log("Your are disconnected from mongoose"))
+  .on("error", (error) => console.log(error));
+
+///////////////////////////////
+// ROUTES
+////////////////////////////////
+// create a test route
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
+
+///////////////////////////////
+// LISTENER
+////////////////////////////////
+app.listen(PORT, () => console.log(`listening on PORT ${PORT}`));
 ```
 
-Git `add and commit` changes.  
+- Make sure you see the Mongoose Connection message when the server restarts
 
-```sh
-git add .
-git commit -m 'feature-bye - added bye function'
-```
+## Adding the People Model
 
-
-Git log and confirm that both commits are there
-
-```sh
-❯ git log
-commit 065aecf896862a0f8446a6da34106f82cf3018b6 (HEAD -> feature-bye)
-Author: Joe Keohan <jkeohan@gmail.com>
-Date:   Wed Jul 15 08:17:21 2020 -0400
-
-    feature-bye - added bye function
-
-commit 6f25491daadbd6ecabe0bd9499016be4133abd3b (master)
-Author: Joe Keohan <jkeohan@gmail.com>
-Date:   Wed Jul 15 08:10:31 2020 -0400
-
-    feature-hello - added hello function
-```
-
-Try using the `git log --oneline` flag
-
-```sh
-git log --online 
-
-065aecf (HEAD -> feature-bye) feature-bye - added bye function
-6f25491 (master) feature-hello - added hello function
-```
-
-Chekcout the master branch and confirm that bye.js file doesn't exist
-
-```sh
- git checkout master
- ```
-
-Git log and confirm that the commit message from the feature-bye branch doesn't exist
-
-```sh
-git log
-
-commit 6f25491daadbd6ecabe0bd9499016be4133abd3b (HEAD -> master)
-Author: Joe Keohan <jkeohan@gmail.com>
-Date:   Wed Jul 15 08:10:31 2020 -0400
-
-    feature-hello - added hello function
-```
-
-Merge the feature-bye branch into master
-
-```sh
-git merge feature-bye
-```
-
-```sh
-Updating 6f25491..065aecf
-Fast-forward
- bye.js | 3 +++
- 1 file changed, 3 insertions(+)
- create mode 100644 bye.js
-```
-
-Git log and confirm that the feature-bye branch is now included in the logs
-```sh
-commit 065aecf896862a0f8446a6da34106f82cf3018b6 (HEAD -> master, feature-bye)
-Author: Joe Keohan <jkeohan@gmail.com>
-Date:   Wed Jul 15 08:17:21 2020 -0400
-
-    feature-bye - added bye function
-
-commit 6f25491daadbd6ecabe0bd9499016be4133abd3b
-Author: Joe Keohan <jkeohan@gmail.com>
-Date:   Wed Jul 15 08:10:31 2020 -0400
-
-    feature-hello - added hello function
-```
-
-Push the feature-bye branch to the remote repo
-
-```sh
-git push origin feature-bye
-
-remote: 
-remote: Create a pull request for 'bye' on GitHub by visiting:
-remote:      https://github.com/jkeohan/git-testing/pull/new/bye
-remote: 
-To https://github.com/jkeohan/git-testing.git
- * [new branch]      bye -> bye
-```
-
-Since the feature branch has already been merged with maater we should delete the local branch
-
-```sh
-git braanch -d feature-bye
-```
-
-Let's assume that the team has also downloaded and merged the feature branch we pushed to the remote repo and now delete the remote branch as well. 
-
-```sh
-git push origin --delete feature-bye
-```
-
-That completes the successful workflow of creating a feature branch and merging to master 
-
-
-### Conflict Resolution
-
-Feature branches are great but can lead to difficulties
-when overlapping or incompatible sets of changes are merged back in to a common branch, e.g., `master`.  `Git` is pretty good about safely handling multiple streams of changes, but sometimes you have to manually pitch in to get the job done.
-
-If you are trying to use `git merge` and it produces a conflict the output will look something like this:
-
-```bash
-Auto-merging convo.js
-CONFLICT (content): Merge conflict in convo.js
-Resolved 'convo.js' using previous resolution.
-Automatic merge failed; fix conflicts and then commit the result.
-```
-
-> To see the beginning of the merge conflict in your file, search the file for the conflict marker <<<<<<<. When you open the file in your text editor, you'll see the changes from the HEAD or base branch after the line <<<<<<< HEAD. Next, you'll see =======, which divides your changes from the changes in the other branch, followed by >>>>>>> BRANCH-NAME.
-[source](https://help.github.com/articles/resolving-a-merge-conflict-using-the-command-line/)
-
-Create a new file called: `stringly.js`
-
-```sh
-touch stringly.js
-```
-
-Checkout a new branch called `feature-upperCase`
-```sh
-git checkout -b feaature-upperCase
-```
-
-
-Add a function called `toUpperCase`
+Let's add a People model to server.js along with an index and create route to see and create our people. Make sure to add cors and express.json middleware!
 
 ```js
-function toUpperCase() {}
-```
+///////////////////////////////
+// DEPENDENCIES
+////////////////////////////////
+// get .env variables
+require("dotenv").config();
+// pull PORT from .env, give default value of 3000
+// pull MONGODB_URL from .env
+const { PORT = 3000, MONGODB_URL } = process.env;
+// import express
+const express = require("express");
+// create application object
+const app = express();
+// import mongoose
+const mongoose = require("mongoose");
+// import middlware
+const cors = require("cors");
+const morgan = require("morgan");
 
-Add and commit the changes
+///////////////////////////////
+// DATABASE CONNECTION
+////////////////////////////////
+// Establish Connection
+mongoose.connect(MONGODB_URL, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+});
+// Connection Events
+mongoose.connection
+  .on("open", () => console.log("Your are connected to mongoose"))
+  .on("close", () => console.log("Your are disconnected from mongoose"))
+  .on("error", (error) => console.log(error));
 
-```sh
-git add .
-git commit -m  'feature-upperCase - added toUpperCase function'
-```
+///////////////////////////////
+// MODELS
+////////////////////////////////
+const PeopleSchema = new mongoose.Schema({
+  name: String,
+  image: String,
+  title: String,
+});
 
-```sh
-git checkout master
-```
+const People = mongoose.model("People", PeopleSchema);
 
-Merge feature-upperCase to master
+///////////////////////////////
+// MiddleWare
+////////////////////////////////
+app.use(cors()); // to prevent cors errors, open access to all origins
+app.use(morgan("dev")); // logging
+app.use(express.json()); // parse json bodies
 
-```sh
-git merge feature-upperCase
-```
+///////////////////////////////
+// ROUTES
+////////////////////////////////
+// create a test route
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
 
-Checkout a new branch called `feature-lowerrCase`
-
-```sh
-git checkout -b feature-lowerrCase
-```
-
-Add a function called `toUpperCase`
-
-```js
-function toLowerCase() {}
-```
-
-Add and commit the changes
-
-```sh
-git add .
-git commit -m  'feature-lowerCase - added toLowerCase function'
-```
-
-
-Checkout master
-
-```sh
-git checkout master
-```
-
-
-Merge feature-lowerCase with master
-
-```sh
-git merge feature-lowerCase
-```
-
-You should see a message indicating there has been a conflict and when you examine stringly.js you will see the following:
-
-
-  ```js
-  <<<<<<< HEAD
-  function toUpper(str) {
-    return str.toUpperCase();
-  =======
-  function toLower(str) {
-    return str.toLowerCase();
-  >>>>>>> lower
+// PEOPLE INDEX ROUTE
+app.get("/people", async (req, res) => {
+  try {
+    // send all people
+    res.json(await People.find({}));
+  } catch (error) {
+    //send error
+    res.status(400).json(error);
   }
-  ```
+});
 
-Resolve conflict by either removing the utility lines (a rarely available solution but it works in this case), or remove one set of changes.  Either way, whatever the state of the file when we save+quit, that will be what ends up being committed so make sure it's valid!
+// PEOPLE CREATE ROUTE
+app.post("/people", async (req, res) => {
+  try {
+    // send all people
+    res.json(await People.create(req.body));
+  } catch (error) {
+    //send error
+    res.status(400).json(error);
+  }
+});
 
-### Exercise: Local Conflict Resolution
-Go [here](local_lab.md) and follow the instructions
+///////////////////////////////
+// LISTENER
+////////////////////////////////
+app.listen(PORT, () => console.log(`listening on PORT ${PORT}`));
+```
 
+- create 3 people using postman to make post requests to /people
 
+- test the index route with a get request to /people
 
-## Pull Request And Merging In Github
+## Update and Delete
 
-The instructor will ask the students to fork/clone this repo, if they haven't already done so, and to create a new file caalled: `<student-name>.md` where they will include a random fact about themselves. 
+Let's add an Update and Delete API Route to server.js
 
-They will add/commit and push to their forked copy of the repo and the instructor will choose a volunteer to share their screen and make a Pull Request.
+```js
+///////////////////////////////
+// DEPENDENCIES
+////////////////////////////////
+// get .env variables
+require("dotenv").config();
+// pull PORT from .env, give default value of 3000
+// pull MONGODB_URL from .env
+const { PORT = 3000, MONGODB_URL } = process.env;
+// import express
+const express = require("express");
+// create application object
+const app = express();
+// import mongoose
+const mongoose = require("mongoose");
+// import middlware
+const cors = require("cors");
+const morgan = require("morgan");
 
-The instructor will then walk through the process of approving and merging the pull request. 
+///////////////////////////////
+// DATABASE CONNECTION
+////////////////////////////////
+// Establish Connection
+mongoose.connect(MONGODB_URL, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+});
+// Connection Events
+mongoose.connection
+  .on("open", () => console.log("Your are connected to mongoose"))
+  .on("close", () => console.log("Your are disconnected from mongoose"))
+  .on("error", (error) => console.log(error));
 
+///////////////////////////////
+// MODELS
+////////////////////////////////
+const PeopleSchema = new mongoose.Schema({
+  name: String,
+  image: String,
+  title: String,
+});
 
-[Creating a PR from a branch](https://help.github.com/articles/creating-a-pull-request/)
+const People = mongoose.model("People", PeopleSchema);
 
-[Approving/Merging a PR](https://help.github.com/articles/merging-a-pull-request/)
+///////////////////////////////
+// MiddleWare
+////////////////////////////////
+app.use(cors()); // to prevent cors errors, open access to all origins
+app.use(morgan("dev")); // logging
+app.use(express.json()); // parse json bodies
 
-These may prove helpful in the following exercise
+///////////////////////////////
+// ROUTES
+////////////////////////////////
+// create a test route
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
 
-## Exercise: Group Gitting
-It's Go Time: [Git 'r Done](group_lab)
+// PEOPLE INDEX ROUTE
+app.get("/people", async (req, res) => {
+  try {
+    // send all people
+    res.json(await People.find({}));
+  } catch (error) {
+    //send error
+    res.status(400).json(error);
+  }
+});
 
+// PEOPLE CREATE ROUTE
+app.post("/people", async (req, res) => {
+  try {
+    // send all people
+    res.json(await People.create(req.body));
+  } catch (error) {
+    //send error
+    res.status(400).json(error);
+  }
+});
 
-## Bonus:  Rebasing branches
+// PEOPLE CREATE ROUTE
+app.put("/people/:id", async (req, res) => {
+  try {
+    // send all people
+    res.json(
+      await People.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    );
+  } catch (error) {
+    //send error
+    res.status(400).json(error);
+  }
+});
 
-If time permits the instructor willl demo how to rebase branches.
+// PEOPLE CREATE ROUTE
+app.delete("/people/:id", async (req, res) => {
+  try {
+    // send all people
+    res.json(await People.findByIdAndRemove(req.params.id));
+  } catch (error) {
+    //send error
+    res.status(400).json(error);
+  }
+});
 
+///////////////////////////////
+// LISTENER
+////////////////////////////////
+app.listen(PORT, () => console.log(`listening on PORT ${PORT}`));
+```
 
-![](https://i.imgur.com/PRPhtu6.png)
+## Deploy
 
-[`git rebase`](https://git-scm.com/docs/git-rebase)
+- create a git repo in the `backend` folder `git init`
 
-Rebasing rewrites history.  This adds the commits from another branch and puts your commits on top of your branch.  (Actually it puts _new copies_ of your commits on top). Typically, we rebase `master` from another branch.  This does not add an extra merge-commit.
+- add all files to staging `git add .`
 
-**Ex**: From some branch: `git rebase master` will take anything that was added to master since branched off (or last rebased) and put those commits _before yours_.  Your commits are then added on top of your branch.
+- commit `git commit -m "message"`
 
-Technically, `git pull` is a shorthand for `git fetch origin HEAD` together with `git merge origin/HEAD`.  In other words, `pull` is an alias for fetching the changes from origin and merging them into the local copy of the branch.  adding the `--rebase` flag to `pull` will rebase rather than merge, thereby not adding a merge commit to your history but carrying with it additional pain when conflicts emerge.
+- create a new repo on github.com (make sure its empty and public)
 
+- add the remote to your local repo `git remote add origin URL` replate URL with your repos url
 
+- push up your code `git push origin branchName` replace branch name with your active branch, find that with `git branch`
 
-## Bonus: Resets (Resources)
-`git reset` can be used to undo a committed history and place the changes back either into the staging area `--soft` or in the working directory `--mixed` or discard them entirely `--hard`.  Be very careful with `git reset` especially with the `--hard` option since this is potentially destructive.
+- go to heroku and create a new project
 
-If you undo a public history you will have to `git push --force` after making the changes.
+- under deploy connect your repo, enable auto deploys, and trigger a manual deploy
 
-[How to Reset (almost) anything](https://github.com/blog/2019-how-to-undo-almost-anything-with-git)
+- under settings set your MONGO_URL config var
 
-[Reset, Checkout, Revert](https://www.atlassian.com/git/tutorials/resetting-checking-out-and-reverting)
+- in postman test all your API endpoints
 
+## Lab Part 1 - Cheese App
 
+- create another folder called "Cheese App"
 
-## Extra Resources
-- [An Incredible Git Tutorial](http://gitimmersion.com/) probably the second most helpful git thing I've ever come across . . .by our friend `Jim Weirich`
+- create a backend and frontend folder like you did for today's lesson
 
-- [a nice set of cheat sheets](https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet) from Atlassian
+- create a cheese API with index, create, update and delete routes
 
-- [A more in depth and practical look at git rebase](https://dev.to/maxwell_dev/the-git-rebase-introduction-i-wish-id-had) Helpful to strengthen your rebase sorcery
+- the model should look like
 
-- [Linus Torvalds nerding out about git](https://www.youtube.com/watch?v=4XpnKHJAok8) Buckle up
+```
+name: String,
+countryOfOrigin: String,
+image: String
+```
 
-- [Obligatory Junio Hamano interview](https://www.youtube.com/watch?v=qs_xS1Y6nGc)
+- Test the API, deploy the API, test the deployed API
+
+# React People Setup, Index, Create
+
+## Setup
+
+- open terminal in frontend folder
+
+- install react router and sass `npm install react-router-dom sass`
+
+- create a file called styles.scss in the /src folder
+
+## Installing Router and Sass
+
+- Update index.js to like like so
+
+```js
+import React from "react";
+import ReactDOM from "react-dom";
+// IMPORT SCSS FILE TO BE SOURCE OF STYLING
+import "./styles.scss";
+// IMPORT ROUTER
+import { BrowserRouter as Router } from "react-router-dom";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+
+ReactDOM.render(
+  <Router>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </Router>,
+  document.getElementById("root")
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+```
+
+## Scoping Out Our Components
+
+- Create a components and pages folder
+
+- In the components folder create a Header.js and Main.js file
+
+- In the pages folder create a Index.js and Show.js folder
+
+- Write the component boilerplate and export the component in all the created files
+
+```jsx
+function Component(props) {
+  return <h1>Component Name</h1>;
+}
+
+export default Component;
+```
+
+## App.js
+
+Our desired component Architecture
+
+```
+-> App
+  -> Header
+  -> Main |state: people|
+    -> Switch
+      -> Route |path: "/"|
+        -> Index |Props: people, createPeople|
+      -> Route |path="/people/:id|
+        -> Show |Props: people, updatePeople, deletePeople|
+```
+
+Let's add the following to App.js
+
+```js
+import "./App.css";
+import Header from "./components/Header";
+import Main from "./components/Main";
+
+function App() {
+  return (
+    <div className="App">
+      <Header />
+      <Main />
+    </div>
+  );
+}
+
+export default App;
+```
+
+## Setting up router in Main.js
+
+- let's create our routes
+
+```js
+import { useEffect, useState } from "react";
+import { Route, Switch } from "react-router-dom";
+import Index from "../pages/Index";
+import Show from "../pages/Show";
+
+function Main(props) {
+  return (
+    <main>
+      <Switch>
+        <Route exact path="/">
+          <Index />
+        </Route>
+        <Route path="/people/:id" render={(rp) => <Show {...rp} />} />
+      </Switch>
+    </main>
+  );
+}
+
+export default Main;
+```
+
+## Setting Up Navigation
+
+Let's put the following in Header.js
+
+```js
+import { Link } from "react-router-dom";
+
+function Header(props) {
+  return (
+    <nav className="nav">
+      <Link to="/">
+        <div>People App</div>
+      </Link>
+    </nav>
+  );
+}
+
+export default Header;
+```
+
+## Sass
+
+Sass is a CSS pre-compiler that allows us some new tricks in writing CSS including...
+
+- Nesting
+- Mixin
+- Variables
+
+Let's write some Sass in our styles.scss
+
+```scss
+// --------------------------
+// VARIABLES
+// --------------------------
+$maincolor: black;
+$contrastcolor: white;
+
+@mixin white-text-black-bg {
+  color: $contrastcolor;
+  background-color: $maincolor;
+}
+
+@mixin black-test-white-bg {
+  color: $maincolor;
+  background-color: $contrastcolor;
+}
+
+// --------------------------
+// Header
+// --------------------------
+
+nav {
+  @include white-text-black-bg;
+  display: flex;
+  justify-content: flex-start;
+
+  a {
+    @include white-text-black-bg;
+    div {
+      margin: 10px;
+      font-size: large;
+    }
+  }
+}
+```
+
+## Displaying People in Index
+
+We need the state to exist in Main so it can be shared between Index and Show. So let's update Main to have:
+
+- state to hold our list of people
+- function to make the api call for people
+- function to create a new person
+- useEffect to make initial call for people list
+- pass the people state and the create function to Index
+
+Main.js
+
+```js
+import { useEffect, useState } from "react";
+import { Route, Switch } from "react-router-dom";
+import Index from "../pages/Index";
+import Show from "../pages/Show";
+
+function Main(props) {
+  const [people, setPeople] = useState(null);
+
+  const URL = "http://localhost:4000/people/";
+
+  const getPeople = async () => {
+    const response = await fetch(URL);
+    const data = await response.json();
+    setPeople(data);
+  };
+
+  const createPeople = async (person) => {
+    // make post request to create people
+    await fetch(URL, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(person),
+    });
+    // update list of people
+    getPeople();
+  };
+
+  useEffect(() => getPeople(), []);
+
+  return (
+    <main>
+      <Switch>
+        <Route exact path="/">
+          <Index people={people} createPeople={createPeople} />
+        </Route>
+        <Route path="/people/:id" render={(rp) => <Show {...rp} />} />
+      </Switch>
+    </main>
+  );
+}
+
+export default Main;
+```
+
+Let's now display the people in Index.js
+
+```js
+import { useState } from "react";
+import {Link} from "react-router-dom"
+
+function Index(props) {
+
+  // loaded function
+  const loaded = () => {
+    return props.people.map((person) => (
+      <div key={person._id} className="person">
+        <Link to={`/people/${person._id}`}><h1>{person.name}</h1></Link>
+        <img src={person.image} alt={person.name} />
+        <h3>{person.title}</h3>
+      </div>
+    ));
+  };
+
+  const loading = () => {
+    return <h1>Loading...</h1>;
+  };
+  return props.people ? loaded() : loading()
+
+  );
+}
+
+export default Index;
+```
+
+## Creating People
+
+Let's now add a form to our index.js
+
+- state to hold the form data
+- form inputs in our JSX
+- handlechange function to allow our state to control the form
+- handlesubmit function handle form submisssion
+
+```js
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+function Index(props) {
+  // state to hold formData
+  const [newForm, setNewForm] = useState({
+    name: "",
+    image: "",
+    title: "",
+  });
+
+  // handleChange function for form
+  const handleChange = (event) => {
+    setNewForm({ ...newForm, [event.target.name]: event.target.value });
+  };
+
+  // handle submit function for form
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    props.createPeople(newForm);
+    setNewForm({
+      name: "",
+      image: "",
+      title: "",
+    });
+  };
+
+  // loaded function
+  const loaded = () => {
+    return props.people.map((person) => (
+      <div key={person._id} className="person">
+        <Link to={`/people/${person._id}`}>
+          <h1>{person.name}</h1>
+        </Link>
+        <img src={person.image} alt={person.name} />
+        <h3>{person.title}</h3>
+      </div>
+    ));
+  };
+
+  const loading = () => {
+    return <h1>Loading...</h1>;
+  };
+  return (
+    <section>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={newForm.name}
+          name="name"
+          placeholder="name"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={newForm.image}
+          name="image"
+          placeholder="image URL"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={newForm.title}
+          name="title"
+          placeholder="title"
+          onChange={handleChange}
+        />
+        <input type="submit" value="Create Person" />
+      </form>
+      {props.people ? loaded() : loading()}
+    </section>
+  );
+}
+
+export default Index;
+```
+
+## Conclusion
+
+You should now be able to see all the people and create people
+
+## Lab
+
+Begin the Frontend for your Cheese app, and create the ability to display and create cheeses like our People app.
+
+# People Build, Show, Edit and Delete
+
+## Links to Show Page
+
+We want generate links to each persons show page so let's do the following in Index.js
+
+```js
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+function Index(props) {
+  // state to hold formData
+  const [newForm, setNewForm] = useState({
+    name: "",
+    image: "",
+    title: "",
+  });
+
+  // handleChange function for form
+  const handleChange = (event) => {
+    setNewForm({ ...newForm, [event.target.name]: event.target.value });
+  };
+
+  // handle submit function for form
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    props.createPeople(newForm);
+    setNewForm({
+      name: "",
+      image: "",
+      title: "",
+    });
+  };
+
+  // loaded function
+  const loaded = () => {
+    return props.people.map((person) => (
+      <div key={person._id} className="person">
+        <Link to={`/people/${person._id}`}>
+          <h1>{person.name}</h1>
+        </Link>
+        <img src={person.image} alt={person.name} />
+        <h3>{person.title}</h3>
+      </div>
+    ));
+  };
+
+  const loading = () => {
+    return <h1>Loading...</h1>;
+  };
+  return (
+    <section>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={newForm.name}
+          name="name"
+          placeholder="name"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={newForm.image}
+          name="image"
+          placeholder="image URL"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={newForm.title}
+          name="title"
+          placeholder="title"
+          onChange={handleChange}
+        />
+        <input type="submit" value="Create Person" />
+      </form>
+      {props.people ? loaded() : loading()}
+    </section>
+  );
+}
+
+export default Index;
+```
+
+## The Show Page
+
+Let's pass the people data to the Show page via props and make a update and delete function for the show page, head over to Main.js
+
+```js
+import { useEffect, useState } from "react";
+import { Route, Switch } from "react-router-dom";
+import Index from "../pages/Index";
+import Show from "../pages/Show";
+
+function Main(props) {
+  const [people, setPeople] = useState(null);
+
+  const URL = "http://localhost:4000/people/";
+
+  const getPeople = async () => {
+    const response = await fetch(URL);
+    const data = await response.json();
+    setPeople(data);
+  };
+
+  const createPeople = async (person) => {
+    // make post request to create people
+    await fetch(URL, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(person),
+    });
+    // update list of people
+    getPeople();
+  };
+
+  const updatePeople = async (person, id) => {
+    // make post request to create people
+    await fetch(URL + id, {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(person),
+    });
+    // update list of people
+    getPeople();
+  };
+
+  const deletePeople = async (id) => {
+    // make post request to create people
+    await fetch(URL + id, {
+      method: "delete",
+    });
+    // update list of people
+    getPeople();
+  };
+
+  useEffect(() => getPeople(), []);
+
+  return (
+    <main>
+      <Switch>
+        <Route exact path="/">
+          <Index people={people} createPeople={createPeople} />
+        </Route>
+        <Route
+          path="/people/:id"
+          render={(rp) => (
+            <Show
+              people={people}
+              updatePeople={updatePeople}
+              deletePeople={deletePeople}
+              {...rp}
+            />
+          )}
+        />
+      </Switch>
+    </main>
+  );
+}
+
+export default Main;
+```
+
+Let's grab the selected person from the people array in props and display them.
+
+Show.js
+
+```js
+function Show(props) {
+  const id = props.match.params.id;
+  const people = props.people;
+  const person = people.find((p) => p._id === id);
+
+  return (
+    <div className="person">
+      <h1>{person.name}</h1>
+      <h2>{person.title}</h2>
+      <img src={person.image} alt={person.name} />
+    </div>
+  );
+}
+
+export default Show;
+```
+
+## Updating a Person
+
+On the show page let's add
+
+- state for a form
+
+- handleChange and handleSubmit function
+
+- a form in the JSX below the person
+
+```js
+import { useState } from "react";
+function Show(props) {
+  const id = props.match.params.id;
+  const people = props.people;
+  const person = people.find((p) => p._id === id);
+
+  // state for form
+  const [editForm, setEditForm] = useState(person);
+
+  // handleChange function for form
+  const handleChange = (event) => {
+    setEditForm({ ...editForm, [event.target.name]: event.target.value });
+  };
+
+  // handlesubmit for form
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    props.updatePeople(editForm);
+    // redirect people back to index
+    props.history.push("/");
+  };
+
+  return (
+    <div className="person">
+      <h1>{person.name}</h1>
+      <h2>{person.title}</h2>
+      <img src={person.image} alt={person.name} />
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={editForm.name}
+          name="name"
+          placeholder="name"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={editForm.image}
+          name="image"
+          placeholder="image URL"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={editForm.title}
+          name="title"
+          placeholder="title"
+          onChange={handleChange}
+        />
+        <input type="submit" value="Update Person" />
+      </form>
+    </div>
+  );
+}
+
+export default Show;
+```
+
+## Deleting a Person
+
+Last Stop is adding a button on the show page to delete a user!
+
+```js
+import { useState } from "react";
+function Show(props) {
+  const id = props.match.params.id;
+  const people = props.people;
+  const person = people.find((p) => p._id === id);
+
+  const [editForm, setEditForm] = useState(person);
+
+  // handleChange function for form
+  const handleChange = (event) => {
+    setEditForm({ ...editForm, [event.target.name]: event.target.value });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    props.updatePeople(editForm);
+    props.history.push("/");
+  };
+
+  const removePerson = () => {
+    props.deletePeople(person._id);
+    props.history.push("/");
+  };
+
+  return (
+    <div className="person">
+      <h1>{person.name}</h1>
+      <h2>{person.title}</h2>
+      <img src={person.image} alt={person.name} />
+      <button id="delete" onClick={removePerson}>
+        DELETE
+      </button>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={editForm.name}
+          name="name"
+          placeholder="name"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={editForm.image}
+          name="image"
+          placeholder="image URL"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          value={editForm.title}
+          name="title"
+          placeholder="title"
+          onChange={handleChange}
+        />
+        <input type="submit" value="Update Person" />
+      </form>
+    </div>
+  );
+}
+
+export default Show;
+```
+
+## Some Final Styling
+
+A few more changes to our styles.scss
+
+```scss
+// --------------------------
+// VARIABLES
+// --------------------------
+$maincolor: black;
+$contrastcolor: white;
+
+@mixin white-text-black-bg {
+  color: $contrastcolor;
+  background-color: $maincolor;
+}
+
+@mixin black-test-white-bg {
+  color: $maincolor;
+  background-color: $contrastcolor;
+}
+
+// --------------------------
+// Header
+// --------------------------
+
+nav {
+  @include white-text-black-bg;
+  display: flex;
+  justify-content: flex-start;
+
+  a {
+    @include white-text-black-bg;
+    div {
+      margin: 10px;
+      font-size: large;
+    }
+  }
+}
+
+// --------------------------
+// Form
+// --------------------------
+
+section,
+div {
+  form {
+    input {
+      @include white-text-black-bg;
+      padding: 10px;
+      font-size: 1.1em;
+      margin: 10px;
+
+      &[type="submit"]:hover {
+        @include black-test-white-bg;
+      }
+    }
+  }
+}
+
+// --------------------------
+// button
+// --------------------------
+
+button#delete {
+  @include white-text-black-bg;
+  display: block;
+  margin: auto;
+  font-size: 1.3em;
+  padding: 10px;
+}
+
+// --------------------------
+// images
+// --------------------------
+
+img {
+  width: 300px;
+  height: 300px;
+  border-radius: 90px;
+  object-fit: cover;
+}
+```
+
+## Deploy
+
+- add a netlify.toml with the following
+
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+```
+
+_NOTE, if you wanted to deploy to Version you'd include a vercel.json with the follow_
+
+```json
+{
+  "version": 2,
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
+}
+```
+
+- push frontend repo to github
+
+- connect to netlify
+
+- done
+
+**[Finished Backend App Example](https://git.generalassemb.ly/AlexMerced/people_backend)**
+**[Finished Frontend App Example](https://git.generalassemb.ly/AlexMerced/people_frontend)**
+
+## Lab - Complete Your Cheese App
+
+Complete your cheese app using the steps of todays lessons adding the following:
+
+- the ability see an individual cheese
+- the ability edit a cheese
+- the ability to delete a cheese

@@ -1,9 +1,10 @@
 ![](/ga_cog.png)
 
 ---
+
 Title: Introduction to CSS Grid<br>
 Type: Morning Exercise <br>
-    Course: SEIR-Baby-Yoda<br>
+Course: SEIR-Baby-Yoda<br>
 Competencies: CSS, Grid<br>
 Prerequisites: HTML, CSS basics<br>
 Duration: 45 min
@@ -40,41 +41,49 @@ You can always check out [caniuse.com](http://caniuse.com/) and [shouldiprefix](
 
 - **Grid area** - Any rectangular area bounded by four grid lines and made up of one or more grid cells.
 
-
 ## Today's Build
+
 ![](https://imgur.com/4Z16JXq.png)
 
 ### Getting Started
 
 #### Starter-Code Directory
+
 - cd into w09d03 `morning_exercise` folder
-- atom .
+- code .
 - Inside there are two files `index.html` and `main.css`
 - `main.css` is the only file you will edit this morning
 - Open `index.html` in your browser
 
-*(Fun fact: Firefox includes a Grid Inspector, you can open it there if you have it - or you can check-out my example)*
+_(Fun fact: Firefox includes a Grid Inspector, you can open it there if you have it - or you can check-out my example)_
 
-#### What we have to start with 
+#### What we have to start with
+
 ![](https://i.imgur.com/dziDSG5.png)
 
 #### Let's start by adding in our grid
+
 main.css
+
 ```
 .container {
   display: grid;
 }
 ```
-We don't see any changes yet because we haven't defined our grid. 
+
+We don't see any changes yet because we haven't defined our grid.
 
 ## Creating Our Grid
 
 #### Explicit vs Implicit Grids
+
 - An **Explicit Grid** is when we manually define our grid using `grid-template-rows`, `grid-template-columns` and `grid-areas`.
 - An **Implicit Grid** is formed when there are more grid items than cells in the grid or when a grid item is placed outside of the explicit grid, the grid container automatically generates grid tracks by adding grid lines to the grid.
 
 ### Let's define our rows and columns
+
 **main.css**
+
 ```
 .container {
   grid-auto-columns: 1fr;
@@ -89,6 +98,7 @@ When creating our rows/columns we can use the normal measurements such as px or 
 When using fractional units you are specifying the fractional amount of space out of what is available you would like for a column/row to take up. For example purposes we have used pixels for the template-rows and fractional units for the grid-columns.
 
 ### Now let's specify where we want our grid items to show up within our grid.
+
 - To do so we are going to state which column we would like our item to start at `grid-column-start`.
 - You can also specify which column you would like it to end on `grid-column-end`.
 - If you don't set an end point it will automatically take up one column.
@@ -102,7 +112,7 @@ Let's start with our header section.
 }
 ```
 
-In this case we don't need to explicitly define how many rows we would like for our  `.header` to span, because we only want it to span 1 which is the default.
+In this case we don't need to explicitly define how many rows we would like for our `.header` to span, because we only want it to span 1 which is the default.
 
 #### We can move on to the sidebars now
 
@@ -123,6 +133,7 @@ In this case we don't need to explicitly define how many rows we would like for 
 ```
 
 #### Let's now choose where we want our `.main` content displayed within our grid
+
 ```
 .main {
   grid-column-start: 4;
@@ -132,19 +143,19 @@ In this case we don't need to explicitly define how many rows we would like for 
 
 #### Finally we will create a grid within a grid for our `.footer` section
 
- Let's start by placing the footer in our original grid. This time let's use `grid-area` to accomplish this. 
- 
+Let's start by placing the footer in our original grid. This time let's use `grid-area` to accomplish this.
+
 Grid-area can be used as shorthand for row start / col start / row end / col end.
 
- ```
- .footer {
-  grid-area: 3 / 3 / 4 / span 8;
- }
+```
+.footer {
+ grid-area: 3 / 3 / 4 / span 8;
+}
 ```
 
-You might notice we used two different methods of specification within our grid area.  
+You might notice we used two different methods of specification within our grid area.
 
-We used regular numbers to specify start and stop for the first 3 values, the fourth uses `span`. Which declares how many rows/columns you want your grid to take up. 
+We used regular numbers to specify start and stop for the first 3 values, the fourth uses `span`. Which declares how many rows/columns you want your grid to take up.
 
 Now we can make the `.footer` section into it's own grid in order to place our footer items in the desired places.
 
@@ -185,6 +196,7 @@ We have 4 items in our footer section, let's go ahead and specify where we would
   grid-column-start: 9;
 }
 ```
+
 ![](https://i.imgur.com/EQOxmVn.png)
 
 #### Centering our text elements within our grid items
@@ -210,8 +222,8 @@ This will specify the size of the grid lines.
 
 ```
 .container {
-  grid-column-gap: 10px; 
-  grid-row-gap: 15px; 
+  grid-column-gap: 10px;
+  grid-row-gap: 15px;
 }
 ```
 
@@ -219,18 +231,18 @@ This will specify the size of the grid lines.
 
 ```
 .container {
-  grid-gap: 15px 10px; 
+  grid-gap: 15px 10px;
 }
 ```
 
 ![](https://imgur.com/IWP8yuV.png)
 
-## Final Thoughts 
+## Final Thoughts
 
-That is all we are going to go over today, though Grid has many more useful features that you can utilize. Take some time to review and learn more about Grid using the resources below. 
-
+That is all we are going to go over today, though Grid has many more useful features that you can utilize. Take some time to review and learn more about Grid using the resources below.
 
 ## References
+
 [CSS-TRICKS A Complete Guide to Grid](https://css-tricks.com/snippets/css/complete-guide-grid/)
 
 [Learn CSS Grid](https://learncssgrid.com/)

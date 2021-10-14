@@ -12,3 +12,5 @@
 | 8   | Express/React Build  (React App)      |
 | 9   | Group Git      |
 | 10  | Bookmard'd Group Full Day Lab    |
+
+- Bonus exercises in the bonus folder

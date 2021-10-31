@@ -5,7 +5,10 @@ Today and tomorrow during the morning lesson complete these Github Learning Lab 
 - [Reviewing Pull Requests](https://lab.github.com/githubtraining/reviewing-pull-requests)
 - [Handling Merge Conflicts](https://lab.github.com/githubtraining/managing-merge-conflicts)
 
-## Hungry For More
+## Hungry for More
+- Finish the [Happy Fun Ball Exercise](https://git.generalassemb.ly/SEIR-927/Unit_3_React_Express/blob/main/Day_04/morning_exercise/README.md)
+
+## Super Hungry For More
 
 Not only is github great for collaborating (like your group project at the end of this unit), it is now an important part of "DevOps" (Developer Operations).
 

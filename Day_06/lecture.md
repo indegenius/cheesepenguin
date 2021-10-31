@@ -228,3 +228,5 @@ app.delete("/turtles/:index", (req, res) => {
 ## Conclusion
 
 When express is only managing the Controllers and Models part of MVC, life gets a lot easier in the backend. Although, the tradeoff managing the state in our front-end get more complicated, no perfect solution.
+
+## If there is time, refactor the roots with mongoose

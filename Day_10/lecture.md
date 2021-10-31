@@ -1,131 +1,374 @@
-## ALL DAY GROUP LAB IN PAIRS
+# React-Recoil and React-Request
 
-[![General Assembly Logo](/ga_cog.png)](https://generalassemb.ly)
+One of the best things about React is the huge developer community that exists creating an endless supply of libraries, component libraries and even full on frameworks to extend the use of React in web developmnet. In this lecture we'll target a few useful libraries that help solve some of Reacts greatest pain points.
 
-# Bookmark'd
+## What are React's Pain Points?
 
-![](https://fthmb.tqn.com/N8UHZxApLqho5sUDbpSRyEy1tV8=/768x0/filters:no_upscale():max_bytes(150000):strip_icc()/Bookmarks-56d0cca45f9b5879cc7123a4.jpg)
+Below you'll see a list of common pain points and libraries that aim to solve them.
 
-Build a bookmark app that lets you add a title and a link to helpful websites in your coding journey.
+| Pain Point | Libraries |
+|------------|-----------|
+| State Management | Recoil, Mobx, Redux, XState, merced-react-hooks |
+| Making API Calls | react-query, react-request, merced-react-hooks |
+| Forms | Formik, merced-react-hooks |
+| Styling | Styled Components, Emotion, JSS |
 
-#### Learning Objectives
+## Why React Recoil?
 
-- Full CRUD app with React
+Over the years Redux has been probably the most used State Management library for React, recently the creators of React, Facebook, released their own state management library which provides a much simpler and more "Reacty" library called Recoil. Since it's created by the makers of React it touts some very convinient and powerfel functionality.
 
-#### Prerequisites
+## Why react-query
 
-- JavaScript 
-- Express / Node 
-- Mongo / Mongoose 
-- React
+React request doesn't just make the process of making API calls smooth, but it also abstracts away tedious issues like a caching and updating data, it has been growing quite popular since its release.
 
----
+## Let's Get Started
 
-## Overview 
+- create a new react `npx create-react-app recoilquery`
 
-You will be building an app that lets you add a title and a link to helpful websites in your coding journey. When you click on a title, it should take you to the linked website. 
-  - GOTCHA - when testing your app out, note that your links must start with `http` or `https` or else it will error!
+- install libraries `npm install recoil react-query`
 
-_Example:_
+## Setting up the Providers
 
-![](https://i.imgur.com/yq9Ygeu.png) 
+Like many react libraries (like React Router) we setup the library by wrapping our App in a provider.
 
-✨ **Fun Fact:** This homework was inspired by a coding challenge used during a company's hiring process. So, treat it like you're trying to get that job!
+- The recoil provider will help deliver our state across our application
 
-## Deliverables
+- the react-query provider will help make the data from our fetch requests available across the app.
 
-Listed below is the basic required functionality that your Bookmark'd app should have. Some of the user stories are purposefully ambiguous to allow you to ‘solve’ the problems in a way that is intuitive and makes sense to you, as opposed to just checking off specific steps from homework. In addition, remember this is a All-Day Lab and Homework!
+open up src/index.js
 
-#### Express API 
-  - You should have a model for bookmarks that has the following schema:
-      ```
-      title: string
-      url: string
-       ```
-   - You should have routes for...
-      - Index: Getting all bookmarks
-      - Create: Posting a new bookmark 
-      - Delete: Deleting a bookmark
-      - Update: Updating a bookmark 
-      
-#### React Frontend User Stories
-  - As a user, I can see a list of all my bookmarks when I visit the page
-  - As a user, I can click on one of my bookmarks and have it take me to the linked website
-  - As a user, I can create a new bookmark and see that it immediately loads on the page so that I know I successfully added a bookmark
-    - Bonus: As a user, when I create a new bookmark, the form should clear after I submit 
-  - As a user, I can delete a bookmark so I can keep my list relevant 
-  - As a user, I can update a bookmark in case I made a typo or the URL changed
-  - Bonus: As a user, I can sort my bookmark by alphabetical order (hint: look into React filters) 
-  
-#### Styling 
-  - Give your app at least a little bit of styling! How it looks is up to you.
-  
-:red_circle: **Remember to commit often!**
-Because your workflow & the way you decide to tackle finishing this app is up to you, it's also up to you what you commit!
+```js
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { RecoilRoot } from "recoil";
+import { QueryClient, QueryClientProvider } from "react-query";
 
-## Need Some Guidance? 
+const queryClient = new QueryClient();
 
-While we suggest just trying to build off the user stories and specifications given above, it can be hard to know where to get started! So provided below are some slightly more guided steps to get you started. 
+ReactDOM.render(
+  <QueryClientProvider client={queryClient}>
+    <RecoilRoot>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    </RecoilRoot>
+  </QueryClientProvider>,
+  document.getElementById("root")
+);
 
-  <details>
-   <summary><strong>Start with the back end</strong></summary>
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+```
 
-   - Create an express app
-     - what npm packages do you need? Now that we are not using EJS, are there npm packages that we don't need?
-   - Connect it to mongo with mongoose
-   - Create a schema that has the following
-      ``` 
-      title: string
-      url: string ( remember: the links must start with http/https )
-      ```
-   - Create the routes (full CRUD)
-   - Test the routes using Postman (or Windows equivalent or using cURL)
-  </details>
+## Creating State with Recoil
 
-   <details>
-   <summary><strong>Move on to the front end</strong></summary>
+In Recoil, state you want shared with Recoil are called atoms. Let's create an src/atom.js file to declare all our atoms.
 
-   - Your front end should display: 
-      - An index of a clickable list of the title of each bookmark that takes you to the url of your bookmark
-      - A way to delete a bookmark
-      - A way to update a bookmark
-      - A working form to add a new record to the database.
-        - When the data is submitted and processed, the page should immediately reflect the changes
+```js
+import { atom } from "recoil";
 
-   - Getting started:
-     - Use create-react-app to generate a React App
-     - Type out your React Component Architecture
-     - Plan what state you have and where it will exist
-     - Plan what props components will receive
-     - Then execute
+// declare and export an atom
+export const counterState = atom({
+    // the key is used to track the state internally in recoil
+    key: 'counterState',
+    // default value is the value if not other value exists, the starting value essentially
+    default: 0
+})
+```
 
+## Using the Recoil State
 
-## Submission Guidelines
+Let's create a counter component in src/components/counter.js
 
-This is a **two(class)-night** homework, due before class on Monday at 10 AM. You will have a bit of extra homework over the weekend, however, so as always we highly suggest you _do not wait_ until then to start this homework! 
+```js
+import { counterState } from "../atom";
+import { useRecoilState } from "recoil";
 
-- **On the first night of this homework, you should work on:** 
-  - A full CRUD express API for bookmarks
-  - A single-page-app built with React with the ability to create new bookmarks 
-  
-- **On the second night of this homework, you should work on:**
-  - Adding onto your React SPA the ability to see all bookmarks, delete a bookmark, and edit a bookmark 
-  - Adding some styling! 
-  
----
+function Counter(props) {
+  // bring in the state from the atom
+  const [counter, setCounter] = useRecoilState(counterState);
 
- ## Hungry For More? 
-  
-  - Make a searchbox that will filter the bookmark titles 
-  - Watch [this video](https://www.youtube.com/watch?v=YFsduR7mBfY) on making a search box (the final code is at around 3:32 - 3:40, skip to that if you like): 
-  - Add an array of tags to the schema so you can organize your bookmarks by tags
-  - As a user, I should not be able to add a duplicate bookmark so I can keep my list clean
-  - Add some authorization to your app. Some possible user stories you can try:
-      - As a user, I can only use the app if I am logged in
-      - As a user, I can see everyone's bookmarks
-      - As a user, I can only update/delete my own bookmarks
-  - As always, try to add some CSS! Give your app some style! 
-  
----
+  return (
+    <div>
+      <h1>{counter}</h1>
+      <button onClick={() => setCounter(counter + 1)}>Add</button>
+    </div>
+  );
+}
 
-*Copyright 2020, General Assembly Space. Licensed under [CC-BY-NC-SA, 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)*
+export default Counter;
+```
+
+let's import the component in App and see it at work
+
+src/App.js
+
+```js
+import Counter from "./components/counter";
+
+function App(props) {
+  return (
+    <div>
+      <Counter />
+    </div>
+  );
+}
+
+export default App;
+```
+
+Now add two counters:
+
+```js
+import Counter from "./components/counter";
+
+function App(props) {
+  return (
+    <div>
+      <Counter />
+      <Counter />
+    </div>
+  );
+}
+
+export default App;
+```
+
+Notice they both always update, this is because they don't have their own internat state. Instead they are both working off the same external state from recoil. So recoil should be used when you have data that should be in sync throughout your app.
+
+## Using React-Query
+
+create another component, src/components/request.js
+
+```js
+import { useQuery } from "react-query";
+
+function Request() {
+  // make our query
+  const response = useQuery("myQuery", async () => {
+    const r = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+    return r.json();
+  });
+
+  console.log(response);
+
+  return <h1>Request</h1>;
+}
+
+export default Request;
+```
+
+the useQuery hook takes two arguments...
+
+- query key, this is a string for tracking and chaching the query. If another component uses the same key it knows it's the same query so won't refetch but instead use the cached data.
+
+- query function, a function that makes the desired request and returns a promise
+
+## Test it out in app
+
+let's use this component in App.js
+
+```js
+import Counter from "./components/counter";
+import Request from "./components/request";
+
+function App(props) {
+  return (
+    <div>
+      <Counter />
+      <Counter />
+      <Request/>
+    </div>
+  );
+}
+
+export default App;
+```
+
+Examine the console.log and see how the response is given back.
+
+Let's use two copies
+
+```js
+import Counter from "./components/counter";
+import Request from "./components/request";
+
+function App(props) {
+  return (
+    <div>
+      <Counter />
+      <Counter />
+      <Request/>
+      <Request/>
+    </div>
+  );
+}
+
+export default App;
+```
+
+Notice that even though we used the component twice, the console.logs don't increase. This is cause both components are altering the data from the same place kinda like we saw in recoil.
+
+### What's in the response
+
+The main things of note in the response object
+
+- data: the data from the api call
+- isLoading: a boolean on whether the call is still pending, can be used to return loading JSX
+- isError: a boolean on whether the call has failed to return error JSX
+- refetch: a function to repeat the call and update the data for everywhere it is used
+- error: the error if there is one
+
+## Bonus - Custom Hooks
+
+### Custom Hooks for react-query
+
+To make it even easier to refer to the same api call in multiple components, you can build custom hooks to avoid typing the same query function key and function over and over agian. Make a file src/queryhooks.js.
+
+queryhooks.js
+
+```js
+import { useQuery } from "react-query";
+
+// api request custom hook
+export const useJsonPlaceholder = () => {
+    // make api call and save response
+    const response = useQuery("myQuery", async () => {
+    const r = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+    return r.json();
+  });
+  // return response
+  return response
+};
+```
+
+now we can use this custom hook instead of typing out that entire useQuery again.
+
+src/components/request.js
+
+```js
+import { useJsonPlaceholder } from "../hooks";
+
+function Request() {
+  // make our query
+
+  const response = useJsonPlaceholder()
+
+  console.log(response);
+
+  return <h1>Request</h1>;
+}
+
+export default Request;
+```
+
+Also, let's destructure some of those response properties and show how we can render the component conditionally.
+
+```js
+import { useJsonPlaceholder } from "../hooks";
+
+function Request() {
+  // make our query
+
+  const { data, isError, isLoading, refetch } = useJsonPlaceholder();
+
+  // JSX for ERROR
+  if (isError) {
+    return (
+      <div>
+        <h1>Request Failed</h1>
+        <button onClick={() => refetch()}>Try Again</button>
+      </div>
+    );
+  }
+
+  // JSX for Loading
+  if (isLoading) {
+    return (
+      <div>
+        <h1>Loading</h1>
+        <button onClick={() => refetch()}>Try Again</button>
+      </div>
+    );
+  }
+
+  // JSX for API Call Complete
+  return (
+    <div>
+      <h1>Request Succeded</h1>
+      <ul>
+        {Object.keys(data).map((key) => (
+          <li>
+            {key}: {data[key]}
+          </li>
+        ))}
+      </ul>
+      <button onClick={() => refetch()}>Try Again</button>
+    </div>
+  );
+}
+
+export default Request;
+```
+
+### custom hooks for recoil
+
+For our atoms we can just make our custom hooks when we declare them, like so.
+
+atom.js
+
+```js
+import { atom, useRecoilState } from "recoil";
+
+// declare and export an atom
+const counterState = atom({
+    // the key is used to track the state internally in recoil
+    key: 'counterState',
+    // default value is the value if not other value exists, the starting value essentially
+    default: 0
+})
+
+// declare custom hook for the using the atom
+export const useCounterState = () => {
+    return useRecoilState(counterState)
+}
+
+```
+
+Now we don't have to import useRecoilState and the atom, we can just import the custom hook in any components that use that state.
+
+counter.js
+
+```js
+import { useCounterState } from "../atom";
+
+function Counter(props) {
+  // bring in the state from the atom
+  const [counter, setCounter] = useCounterState()
+
+  return (
+    <div>
+      <h1>{counter}</h1>
+      <button onClick={() => setCounter(counter + 1)}>Add</button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+The great thing about customhooks it lets us clean up our code and make reusing state across our app so much easier!
+
+## Non-Deliverable Lab
+
+Try to take the build you created last week and refactor it using react-query and/or recoil.
+
+I highly recommend making these changes on a branch so you keep your original code. Commit what you have already and then run the command `git checkout -b refactor` to work from a branch called refactor. While on this branch push your code using `git push origin refactor`. 
+
+- you can switch branches at anytime with `git checkout BRANCH_NAME`
+- you can see what your current list of branches with the command of `git branch`

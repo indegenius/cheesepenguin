@@ -53,7 +53,7 @@ Here is a table of our commonly used git commands that we've used in this course
 | git |   log    |           --graph            |                           Shows an ASCII graph representing the branch structure of the commit history*`q` to exit*                            |
 | git |  status  |                              |                                        Shows the state of files in a repo (untracked, modified, staged)                                        |
 
-[Link to our wiki with a more complete list of git commands](https://git.generalassemb.ly/Software-Engineering-Immersive-Remote/SEIR-Baby-Yoda/wiki/Git-Cheatsheet)
+[Link to our wiki with a more complete list of git commands](https://git.generalassemb.ly/AlexMerced/orientation/blob/master/cheatsheet/git.md)
 
 Note: `fork` is not on this list because `fork` is not a git command; it is github-specific for copying a repository on github to a new location on github.
 
@@ -110,7 +110,7 @@ As a professional developer, you will do whatever it takes to finish this projec
 ###### Browser - github:
 
 - Fork Happy-Fun-Ball (make a copy of this remote repository to your github account):
-- [Go here](https://git.generalassemb.ly/Software-Engineering-Immersive-Remote/hfb) and click fork (upper right) to fork it to your personal repo (Don't worry! You can totally delete it after the lesson!)
+- [Go here](https://git.generalassemb.ly/SEIR-927/happy-fun-ball) and click fork (upper right) to fork it to your personal repo (Don't worry! You can totally delete it after the lesson!)
 <details><summary>Show Screenshot</summary>
 
 ![Upper right on github](https://i.imgur.com/TjcbBOB.png)

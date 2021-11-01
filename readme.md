@@ -10,7 +10,7 @@
 | 6   | Writing an API in express    |
 | 7   | Express/React Build (API)     |
 | 8   | Express/React Build  (React App)      |
-| 9   | Group Git      |
-| 10  | Bookmard'd Group Full Day Lab    |
+| 9   | Group Git & Bookmark'd Group Lab/Homework      |
+| 10  | Present Bookmark'd and React Bonus Features/Libraries    |
 
 - Bonus exercises in the bonus folder

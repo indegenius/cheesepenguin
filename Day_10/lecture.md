@@ -364,6 +364,14 @@ export default Counter;
 
 The great thing about customhooks it lets us clean up our code and make reusing state across our app so much easier!
 
+## If there is time for more:
+
+- props.children
+- the useContext hook
+- the useReducer hook
+- Utility Components
+- styled components
+
 ## Non-Deliverable Lab
 
 Try to take the build you created last week and refactor it using react-query and/or recoil.
@@ -372,3 +380,5 @@ I highly recommend making these changes on a branch so you keep your original co
 
 - you can switch branches at anytime with `git checkout BRANCH_NAME`
 - you can see what your current list of branches with the command of `git branch`
+
+
